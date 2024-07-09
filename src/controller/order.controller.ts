@@ -4,6 +4,8 @@ import { createOrderValidationSchema } from '../validation/order.validation';
 import { StockLocation } from '../models/location.model';
 import { Order } from '../models/order.model';
 import { Book } from '../models/books.model';
+import { User } from '../models/user.model';
+import { mailService } from '../utils/mail';
 
 export const createOrder: RequestHandler = async (request, response) => {
   try {
@@ -78,6 +80,8 @@ export const createOrder: RequestHandler = async (request, response) => {
       });
     }
     const data = await Order.create(payload);
+    const user = await User.findOne({ _id: request.udata.id });
+    await mailService(user?.email, user?.username);
     return Ok(response, 'order created successfully', data);
   } catch (error: any) {
     return BadRequest(response, { message: error.message });
